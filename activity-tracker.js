@@ -165,13 +165,13 @@ export default class ActivityTracker extends BasePlugin {
 
   onPlayerPossess(data) {
     if (data.player && data.player.eosID) {
-      this.recordActivity(data.player.eosID, data.player.name, 'Possess');
+      this.recordActivity(data.player.eosID, data.player.name, 'PossessAdminCam');
     }
   }
 
   onPlayerUnPossess(data) {
     if (data.player && data.player.eosID) {
-      this.recordActivity(data.player.eosID, data.player.name, 'UnPossess');
+      this.recordActivity(data.player.eosID, data.player.name, 'UnPossessAdminCam');
     }
   }
 

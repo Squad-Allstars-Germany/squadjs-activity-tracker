@@ -1,6 +1,6 @@
 # SquadJS Activity Tracker
 
-A SquadJS plugin that tracks player activity to help server moderators identify AFK players. It monitors in-game events like kills, deaths, damage, revives, and squad actions, then lets moderators query inactivity via chat commands. **Reporting only — no automatic kicks.**
+A SquadJS plugin that tracks player activity to help server moderators identify AFK players. It monitors in-game events such as kills, deaths, damage, revives, squad actions, etc., and then allows moderators to check for latest activity using chat commands.
 
 ## Usage
 
@@ -31,23 +31,23 @@ Only players assigned to a squad are included in the list output. Unassigned pla
 
 The plugin records player activity from the following server events:
 
-| Event | Activity Recorded For |
-|---|---|
-| `PLAYER_DAMAGED` | Attacker + Victim |
-| `PLAYER_WOUNDED` | Attacker |
-| `PLAYER_DIED` | Attacker + Victim |
-| `PLAYER_REVIVED` | Reviver + Revived player |
-| `TEAMKILL` | Attacker + Victim |
-| `PLAYER_POSSESS` | Player |
-| `PLAYER_UN_POSSESS` | Player |
-| `PLAYER_SQUAD_CHANGE` | Player |
-| `SQUAD_CREATED` | Player |
-| `PLAYER_TEAM_CHANGE` | Player |
-| `CHAT_MESSAGE` | Player (optional, can be disabled) |
-| `DEPLOYABLE_DAMAGED` | Attacker |
-| `PLAYER_CONNECTED` | Player (initializes tracking) |
-| `PLAYER_DISCONNECTED` | Player (removes tracking data) |
-| `NEW_GAME` | Clears all data and re-seeds connected players |
+| Event | Activity Recorded For | Activity Label |
+|---|---|---|
+| `PLAYER_WOUNDED` | Attacker | `Wound` |
+| `PLAYER_DIED` | Victim + Attacker | `Death` / `Kill` |
+| `PLAYER_REVIVED` | Reviver + Revived player | `Revive` / `Revived` |
+| `PLAYER_POSSESS` | Player | `PossessAdminCam` |
+| `PLAYER_UN_POSSESS` | Player | `UnPossessAdminCam` |
+| `PLAYER_SQUAD_CHANGE` | Player | `SquadChange` |
+| `CHAT_MESSAGE` | Player (optional, can be disabled) | `Chat` |
+| `SQUAD_CREATED` | Player | `SquadCreated` |
+| `PLAYER_TEAM_CHANGE` | Player | `TeamChange` |
+| `TEAMKILL` | Attacker + Victim | `Teamkill` / `Teamkilled` |
+| `PLAYER_DAMAGED` | Attacker + Victim | `Damage` / `Damaged` |
+| `DEPLOYABLE_DAMAGED` | Attacker | `DeployableDmg` |
+| `PLAYER_CONNECTED` | Player (initializes tracking) | `Connected` |
+| `PLAYER_DISCONNECTED` | Player (removes tracking data) | — |
+| `NEW_GAME` | Clears all data and re-seeds connected players | `NewGame` |
 
 ## Configuration
 
