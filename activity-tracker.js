@@ -30,7 +30,7 @@ export default class ActivityTracker extends BasePlugin {
         required: false,
         description:
           'If true, the !afk command only works when typed in admin chat (ChatAdmin).',
-        default: false
+        default: true
       },
       commandPrefix: {
         required: false,
@@ -42,11 +42,11 @@ export default class ActivityTracker extends BasePlugin {
         description: 'Header text shown at the top of AFK report messages.',
         default: '--- AFK Report ---'
       },
-      maxWarnLength: {
+      maxPage: {
         required: false,
         description:
-          'Maximum character length per RCON warn message. Squad typically supports ~500 chars.',
-        default: 450
+          'Maximum number of warn pages (messages) to send per command response.',
+        default: 2
       }
     };
   }
@@ -59,8 +59,6 @@ export default class ActivityTracker extends BasePlugin {
     this.onPlayerWounded = this.onPlayerWounded.bind(this);
     this.onPlayerDied = this.onPlayerDied.bind(this);
     this.onPlayerRevived = this.onPlayerRevived.bind(this);
-    this.onPlayerPossess = this.onPlayerPossess.bind(this);
-    this.onPlayerUnPossess = this.onPlayerUnPossess.bind(this);
     this.onPlayerSquadChange = this.onPlayerSquadChange.bind(this);
     this.onChatMessage = this.onChatMessage.bind(this);
     this.onPlayerConnected = this.onPlayerConnected.bind(this);
@@ -78,8 +76,6 @@ export default class ActivityTracker extends BasePlugin {
     this.server.on('PLAYER_WOUNDED', this.onPlayerWounded);
     this.server.on('PLAYER_DIED', this.onPlayerDied);
     this.server.on('PLAYER_REVIVED', this.onPlayerRevived);
-    this.server.on('POSSESSED_ADMIN_CAMERA', this.onPlayerPossess);
-    this.server.on('UNPOSSESSED_ADMIN_CAMERA', this.onPlayerUnPossess);
     this.server.on('PLAYER_SQUAD_CHANGE', this.onPlayerSquadChange);
     this.server.on('CHAT_MESSAGE', this.onChatMessage);
     this.server.on('PLAYER_CONNECTED', this.onPlayerConnected);
@@ -106,8 +102,6 @@ export default class ActivityTracker extends BasePlugin {
     this.server.removeEventListener('PLAYER_WOUNDED', this.onPlayerWounded);
     this.server.removeEventListener('PLAYER_DIED', this.onPlayerDied);
     this.server.removeEventListener('PLAYER_REVIVED', this.onPlayerRevived);
-    this.server.removeEventListener('POSSESSED_ADMIN_CAMERA', this.onPlayerPossess);
-    this.server.removeEventListener('UNPOSSESSED_ADMIN_CAMERA', this.onPlayerUnPossess);
     this.server.removeEventListener('PLAYER_SQUAD_CHANGE', this.onPlayerSquadChange);
     this.server.removeEventListener('CHAT_MESSAGE', this.onChatMessage);
     this.server.removeEventListener('PLAYER_CONNECTED', this.onPlayerConnected);
@@ -160,18 +154,6 @@ export default class ActivityTracker extends BasePlugin {
     }
     if (data.victim && data.victim.eosID) {
       this.recordActivity(data.victim.eosID, data.victim.name, 'Revived');
-    }
-  }
-
-  onPlayerPossess(data) {
-    if (data.player && data.player.eosID) {
-      this.recordActivity(data.player.eosID, data.player.name, 'PossessAdminCam');
-    }
-  }
-
-  onPlayerUnPossess(data) {
-    if (data.player && data.player.eosID) {
-      this.recordActivity(data.player.eosID, data.player.name, 'UnPossessAdminCam');
     }
   }
 
@@ -422,13 +404,13 @@ export default class ActivityTracker extends BasePlugin {
   }
 
   async sendWarns(eosID, fullMessage) {
-    const maxLen = this.options.maxWarnLength;
+    const maxPage = this.options.maxPage;
     const lines = fullMessage.split('\n');
     const chunks = [];
     let chunk = '';
 
     for (const line of lines) {
-      if (chunk && (chunk + '\n' + line).length > maxLen) {
+      if (chunk && (chunk + '\n' + line).length > 450) {
         chunks.push(chunk);
         chunk = line;
       } else {
@@ -439,9 +421,10 @@ export default class ActivityTracker extends BasePlugin {
       chunks.push(chunk);
     }
 
-    for (let i = 0; i < chunks.length; i++) {
-      await this.server.rcon.warn(eosID, chunks[i]);
-      if (i < chunks.length - 1) {
+    const pagesToSend = chunks.slice(0, maxPage);
+    for (let i = 0; i < pagesToSend.length; i++) {
+      await this.server.rcon.warn(eosID, pagesToSend[i]);
+      if (i < pagesToSend.length - 1) {
         await new Promise((resolve) => setTimeout(resolve, 250));
       }
     }
